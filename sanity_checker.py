@@ -3,8 +3,8 @@ import argparse
 import os
 
 # The path where we store user limits (store in Docker volume)
-CONFIG_PATH = "config.json"
-account = "account.json"
+CONFIG_PATH = "/home/sandboxuser/app/config.json"
+account = "/home/sandboxuser/app/account.json"
 
 def load_config():
     if not os.path.exists(CONFIG_PATH):

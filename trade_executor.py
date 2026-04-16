@@ -7,8 +7,8 @@ import argparse
 from datetime import datetime
 
 # This is the simulated trading account
-account = "account.json"
-database = "trade_history.db"
+account = "/home/sandboxuser/app/account.json"
+database = "/home/sandboxuser/app/trade_history.db"
 
 def load_account():
     if os.path.exists(account):
@@ -39,7 +39,7 @@ def load_account():
 def trade(firm, price, quantity, action):
     portfolio = load_account()
     if action == "buy":
-        balance = portfolio["balance"] - float((price*quantity),2)
+        balance = portfolio["balance"] - round(float(price*quantity),2)
         if balance <0:
             print ("Invalid: Insufficient balance")
             return
@@ -53,7 +53,7 @@ def trade(firm, price, quantity, action):
             return
         else:
             portfolio["stocks"][firm] -= quantity
-            portfolio["balance"] = portfolio["balance"] + float((price*quantity),2)
+            portfolio["balance"] = portfolio["balance"] + round(float(price*quantity),2)
     
     # Use (?,?,?) as placeholder to prevent SQL input injection attack
     db = sl3.connect(database)

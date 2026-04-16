@@ -1,12 +1,13 @@
 from massive import RESTClient
 import pandas as pt
+import pandas_ta as pta
 import argparse
 import json
 import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-API_KEY = os.getenv("D7sOI2RyluFFXXRe2GuGhsalUl39CzJg") #using environment variable to increase security
+API_KEY = os.getenv("MASSIVE_API_KEY") #using environment variable to increase security
 client = RESTClient(API_KEY)
 
 def get_historical_data(firm, benchmark = "SPY", unit = "years", value = "1"):
@@ -14,6 +15,8 @@ def get_historical_data(firm, benchmark = "SPY", unit = "years", value = "1"):
         val = int(value)
     else:
         val = 1
+    if not unit:
+        unit = "years"
     prd = {unit: val}
     
     #Calculate start and end date of period to get data from    
@@ -21,25 +24,25 @@ def get_historical_data(firm, benchmark = "SPY", unit = "years", value = "1"):
     to_date = datetime.now()
     
     aggs = client.get_aggs(firm, 1, "day", from_date, to_date)
-    information = pt.DataFrame([dict(x) for x in aggs])
+    information = pt.DataFrame([vars(x) for x in aggs])
     information['timestamp'] =pt.to_datetime(information['timestamp'], unit = 'ms')
-    information.set_index('timestamp', implace=True)
+    information.set_index('timestamp', inplace=True)
     
     #Calculate alpha according to benchmark (SPY for alpha calculation in general market, specific benchmarks to be choseny by LLM and filled in when LLM uses this script)
     bench_aggs = client.get_aggs(benchmark, 1, "day", from_date, to_date)
-    bench_info = pt.DataFrame([dict(x) for x in bench_aggs])
-    bench_info['timestamp'] =pt.to_datetime(information['timestamp'], unit = 'ms')
-    bench_info.set_index('timestamp', implace=True)
+    bench_info = pt.DataFrame([vars(x) for x in bench_aggs])
+    bench_info['timestamp'] =pt.to_datetime(bench_info['timestamp'], unit = 'ms')
+    bench_info.set_index('timestamp', inplace=True)
     return information, bench_info
 
 def calculate_indicators(firm, info, bench_info, rsi=14, ema = 20, sma = 100): 
     #14 stands for 14 periods. This is the industry standard for RSI calculation
     #the optimal ma/ema period depends on what the user trend the user wants to capture. If they want fast trends, 10 to 20 is the standard. If they want macro trends, 50, 100 and 200 are standard.
-    info['RSI'] = pt.rsi(info['close'], length=rsi) #info['Close'] is the column for the closing price. RSI uses closing price in calculation. Closing price is the final price at which a stock is traded during a trading session
-    info['EMA'] = pt.ema(info['close'], length=ema) #we use ema instead of sma for short term as ema is more responsive. ma weighs all the prices in the period equally, while ema weighs the most recent prices more heavily.
+    info['RSI'] = pta.rsi(info['close'], length=rsi) #info['Close'] is the column for the closing price. RSI uses closing price in calculation. Closing price is the final price at which a stock is traded during a trading session
+    info['EMA'] = pta.ema(info['close'], length=ema) #we use ema instead of sma for short term as ema is more responsive. ma weighs all the prices in the period equally, while ema weighs the most recent prices more heavily.
     # For example, if a stock were to perform very well in the last 49 days but suddenly crash ytd, ma will ignore it by smoothing it out due to weighing all the prices equally.
     # ema will capture this crash as it gives the heaviest weight to the ytd's price. In stock trading, traders react immediately when such an event happens. We want to make sure our agent is able to do so as well
-    info['SMA'] = pt.sma(info['close'], length=sma) #for long term we use sma instead as we want to see the structural trend of the industry.
+    info['SMA'] = pta.sma(info['close'], length=sma) #for long term we use sma instead as we want to see the structural trend of the industry.
     # A sudden fluctuation such as a crash in a firm's stock is usually not representative of the industry's performance over the years. Therefore, we want to make sure we ignore this when calculating long term trend.
     
     # Alpha Calculation (Symbol vs chosen Benchmark)
@@ -63,6 +66,6 @@ if __name__ == "__main__":
     firm = args.firm
     
     # retrive information
-    info, bench_info = get_historical_data(firm, args.benchmark, args.unit, args.period)
+    info, bench_info = get_historical_data(firm, args.benchmark or "SPY", args.unit, args.period)
     # print data (this will be given to an LLM brain)
     print(calculate_indicators(firm, info, bench_info, args.rsi, args.ema, args.sma))
