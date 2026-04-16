@@ -51,5 +51,5 @@ CMD ["openclaw"]
 
 # the command to set up openclaw with the skill in the container: docker run -it --rm -v "$(pwd):/home/sandboxuser/app" -v "$(pwd)/.openclaw_state:/home/sandboxuser/.openclaw" openclaw-sandbox openclaw onboard
 # the command to check if openclaw detects the skill in the container: docker run -it --rm -v "$(pwd):/home/sandboxuser/app" openclaw-sandbox openclaw skills list
-# the command to run openclaw in the container: docker run -it --rm -v "$(pwd):/home/sandboxuser/app" -v "$(pwd)/.openclaw_state:/home/sandboxuser/.openclaw" -e MASSIVE_API_KEY="[API_KEY]" -e ZAI_API_KEY="your_glm_api_key_here" openclaw-sandbox /bin/bash -c "openclaw gateway --force & openclaw tui"
-# the command to get a command prompt terminal in the container: 
+# the command to run openclaw in the container: docker run -it --rm -v "$(pwd):/home/sandboxuser/app" -v "$(pwd)/.openclaw_state:/home/sandboxuser/.openclaw" -e MASSIVE_API_KEY="[API_KEY]" -e ZAI_API_KEY="your_glm_api_key_here" openclaw-sandbox /bin/bash -c "openclaw gateway start && sleep 2 && openclaw tui"
+# the command to get a command prompt terminal in the container: docker run -it --rm -v "$(pwd)/.openclaw_state:/home/sandboxuser/.openclaw" openclaw-sandbox /bin/bash
