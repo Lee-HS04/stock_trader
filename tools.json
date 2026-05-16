@@ -57,6 +57,27 @@
                 "--action": "Action to take: 'buy' or 'sell'."
             },
             "output_format": "Success message and current account balance."
+        },
+        {
+            "name": "performance_updater",
+            "command": "python3 /home/sandboxuser/app/src/performance_updater.py",
+            "description": "Updates competitive benchmarks. Use --backtest and --date when running historical simulations to ensure the auditor uses synchronized Parquet data.",
+            "args": {
+                "--backtest": "Boolean flag. If present, reads from local StockBench Parquet files.",
+                "--date": "The target end-date for the 30-day performance window (YYYY-MM-DD)."
+            },
+            "output_format": "Updates competitors.json with period-accurate returns."
+        },
+        {
+            "name": "auditor",
+            "command": "python3 /home/sandboxuser/app/src/auditor.py",
+            "description": "Strategic Evolution & Quantitative Auditor (Pillar 4). Benchmarks the agent's internal trade_history.db and account.json against 'The Masters' (Institutional Elite) and 'AI Sprinters' to identify logic gaps and strategic decay.",
+            "args": {
+                "--lookback": "Optional: Number of days to include in the audit (e.g., '7d', '30d'). Default: All history.",
+                "--mode": "Optional: 'summary' for raw metrics or 'evolution' for the full LLM strategic critique. Default: evolution.",
+                "Internal_Input_Notice": "This tool automatically ingests local trade_history.db and competitors.json. No manual data entry required."
+            },
+            "output_format": "JSON Audit Report: Contains Total Return, Market Alpha, Peer Ranking, and a 'Strategic Expert Critique' for logic re-weighting."
         }
     ]
 }
