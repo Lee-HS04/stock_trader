@@ -1,0 +1,62 @@
+{
+    "version": "1.3",
+    "project": "Autonomous-Quant-Trader",
+    "deployment": "Docker-Sandbox",
+    "tools": [
+        {
+            "name": "trading_data",
+            "command": "python3 /home/sandboxuser/app/src/trading_data.py",
+            "description": "Market Sensor. Supports Live (Massive API) and Backtest (StockBench Parquet) modes. Calculates RSI, EMA, SMA, and Alpha.",
+            "args": {
+                "--firm": "Ticker symbol (required).",
+                "--unit": "Time unit: 'years', 'months', 'weeks', 'days'. Default: years.",
+                "--period": "Integer value for the unit. Default: 1.",
+                "--benchmark": "Comparison ticker. Default: SPY.",
+                "--rsi": "Integer period for RSI calculation (standard is 14).",
+                "--ema": "Integer period for EMA calculation (standard is 20).",
+                "--sma": "Integer period for SMA calculation (standard is 100).",
+                "--backtest": "Flag: If set, loads historical data from local Parquet files.",
+                "--date": "YYYY-MM-DD: The simulated 'current' date (Required if --backtest is used)."
+            },
+            "output_format": "JSON: {ticker, date, technical_analysis: {price, rsi, ema, sma, alpha}, fundamental_data: {}}"
+        },
+        {
+            "name": "memory_gate",
+            "command": "python3 /home/sandboxuser/app/src/memory_gate.py",
+            "description": "Agentic Memory System (TITAN/MIRAS). Manages Surprise-Gating, Decay, and Hierarchical Retrieval.",
+            "args": {
+                "--query": "Flag: If set, returns the 3-Level MIRAS Scene Summary instead of logging.",
+                "--ticker": "Ticker symbol (Required for both query and logging).",
+                "--price": "Current price of the ticker (Required for logging).",
+                "--ma": "Moving Average (EMA/SMA) of the ticker (Required for logging).",
+                "--spy_price": "Current price of SPY (Required for Level 1 Macro query).",
+                "--spy_ma": "Moving Average of SPY (Required for Level 1 Macro query).",
+                "--action": "The action taken: 'BUY', 'SELL', or 'SKIP'. Default: SKIP.",
+                "--reason": "The textual logic/monologue explaining the action."
+            },
+            "output_format": "Structured MIRAS Hierarchy Scene Summary string."
+        },
+        {
+            "name": "sanity_checker",
+            "command": "python3 /home/sandboxuser/app/src/sanity_checker.py",
+            "description": "Governance Layer. Validates trade proposals against budget and hallucination safety rails.",
+            "args": {
+                "--proposal": "JSON string: {'firm': '...', 'amount': 0.0, 'proposed_price': 0.0, 'actual_price': 0.0, 'action': 'buy/sell'}"
+            },
+            "constraints": "Strict compliance required. You MUST NOT execute if status is 'REJECTED'.",
+            "output_format": "JSON: {'status': 'APPROVED/REJECTED', 'reason': '...'}"
+        },
+        {
+            "name": "trade_executor",
+            "command": "python3 /home/sandboxuser/app/src/trade_executor.py",
+            "description": "Execution Desk. Updates portfolio (account.json) and history (trade_history.db).",
+            "args": {
+                "--firm": "Ticker symbol.",
+                "--price": "Execution price (Must match trading_data.py output).",
+                "--quantity": "Integer: Number of shares to trade.",
+                "--action": "Action to take: 'buy' or 'sell'."
+            },
+            "output_format": "Success message and current account balance."
+        }
+    ]
+}
