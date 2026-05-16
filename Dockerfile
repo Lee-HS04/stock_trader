@@ -28,7 +28,7 @@ USER sandboxuser
 RUN npm install -g openclaw@latest
 
 # install dependencies
-RUN pip3 install massive-api-client pandas-ta requests-cache
+RUN pip3 install massive-api-client pandas-ta requests-cache pyarrow
 
 # Switch to root to perform system-level tasks. We do this to keep huge installs like openclaw install at the top so that they can be cached, no need to reinstall when we rebuild docker image
 USER root
